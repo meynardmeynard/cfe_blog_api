@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="col-sm-8 col-sm-offset-3">
+        <h1>{{ title }}</h1>
+        <div class="row">
+            <div class="col-sm-6">
+        <form method="GET" action=''>
+                <div class="input-group">
+                    <input class="form-control" type="text" name="q" placeholder="Search posts" value="{{ request.GET.q }}"/>
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" type="submit"><i class="fa fa-search"></i></button>
+                    </span>
+                </div>
+        </form>
+            </div>
+        </div>
+        {% for post in queryset %}
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="thumbnail">
+                        {% if post.image %}
+                            <img src="{{ post.image.url }}" alt="{{ post.title }}" class="img-responsive"/>
+                        {% endif %}
+                        <div class="caption post-detail-item">
+                            <h3><a href="{{ post.get_absolute_url }}">{{ post.title }}</a>
+                                <small>{{ post.timestamp|timesince }} ago</small>
+                                {% if post.user.get_full_name %}
+                                <small>Author: {{ post.user.get_full_name }}</small>
+                                {% endif %}
+                            </h3>
+                            <p class="content-markdown">{{ post.get_markdown|truncatewords_html:35 }}</p>
+                            <p><a href="{{ post.get_absolute_url }}" class="btn btn-primary" role="button">Read More</a>
+                                <a href="#" class="btn btn-default" role="button"><span
+                                        class="glyphicon glyphicon-star"></span></a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr/>
+        {% endfor %}
+
+        <div class="pagination">
+    <span class="step-links">
+        {% if queryset.has_previous %}
+            <a href="?{{ page_request_var }}={{ queryset.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ queryset.number }} of {{ queryset.paginator.num_pages }}.
+        </span>
+
+        {% if queryset.has_next %}
+            <a href="?{{ page_request_var }}={{ queryset.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">next</a>
+        {% endif %}
+    </span>
+        </div>
+
+    </div>
+{% endblock content %}

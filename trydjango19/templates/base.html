@@ -1,0 +1,111 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Try Django 1.9{% endblock title %}</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css"/>
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css"/>
+
+    <link rel="stylesheet" href="{% static "css/base.css" %}"/>
+    <script src="https://use.fontawesome.com/1e96aa33b5.js"></script>
+
+    <style>
+        {% block style %}{% endblock style %}
+    </style>
+    {%  block extra_head %}{% endblock extra_head %}
+</head>
+
+<body>
+<div id="fb-root"></div>
+<script>(function (d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s);
+    js.id = id;
+    js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.8";
+    fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+{% include "messages_dialog.html" %}
+<div class="container">
+    <ol class="breadcrumb">
+        <li><a href="{% url "posts:list" %}">Home</a></li>
+        {% block post_detail_link %}
+        {% endblock %}
+
+        {% if not request.user.is_authenticated %}
+        <li class="pull-right"><a href="{% url "register" %}">Register</a></li>
+        <li class="pull-right"><a href="{% url "login" %}">Login</a>
+        {% else %}
+        <li class="pull-right"><a href="{% url "logout" %}">Logout</a></li>
+        {% endif %}
+    </ol>
+    {% block content %}
+    {% endblock content %}
+</div>
+<!-- Latest compiled and minified JavaScript -->
+
+<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+
+<script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.6/marked.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $(".content-markdown").each(function () {
+            var content = $(this).text()
+            var markedContent = marked(content)
+            $(this).html(markedContent)
+        })
+        $(".post-detail-item img").each(function () {
+            $(this).addClass("img-responsive");
+        })
+
+
+        var titleItem = $("#id_title");
+        function setTitle(value){
+            $("#preview-title").text(value)
+        }
+        setTitle(titleItem.val())
+
+        titleItem.keyup(function () {
+            var newTitle = $(this).val()
+            setTitle(newTitle)
+        })
+
+        var contentItem = $("#id_content");
+
+        function setContent(value){
+            var markedContent = marked(value)
+            $("#preview-content").html(markedContent)
+            $("#preview-content img").each(function () {
+                $(this).addClass("img-responsive")
+            })
+        }
+
+        setContent(contentItem.val())
+        contentItem.keyup(function () {
+            var newContent = $(this).val()
+            setContent(newContent)
+        })
+
+        $(".comment-reply-btn").click(function (event) {
+            event.preventDefault();
+            $(this).parent().next(".comment-reply").fadeToggle();
+        })
+
+    })
+</script>
+
+</body>
+</html>
+
+
+
+
