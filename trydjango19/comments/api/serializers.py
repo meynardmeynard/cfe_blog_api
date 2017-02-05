@@ -12,6 +12,10 @@ from comments.models import Comment
 
 User = get_user_model()
 
+url = HyperlinkedIdentityField(
+    view_name='comments-api:thread',
+)
+
 
 def create_comment_serializer(model_type='post', slug=None, parent_id=None, user=None):
     class CommentCreateSerializer(ModelSerializer):
@@ -68,10 +72,29 @@ class CommentSerializer(ModelSerializer):
     class Meta:
         model = Comment
         fields = [
-            'id',
+            'id'
             'content_type',
             'object_id',
             'parent',
+            'content',
+            'reply_count',
+        ]
+
+    def get_reply_count(self, obj):
+        if obj.is_parent:
+            return obj.children().count()
+        return 0
+
+
+class CommentListSerializer(ModelSerializer):
+    reply_count = SerializerMethodField()
+    url = url
+
+    class Meta:
+        model = Comment
+        fields = [
+            'id',
+            'url',
             'content',
             'reply_count',
         ]
@@ -96,18 +119,33 @@ class CommentChildSerializer(ModelSerializer):
 class CommentDetailSerializer(ModelSerializer):
     reply_count = SerializerMethodField()
     replies = SerializerMethodField()
+    content_object_url = SerializerMethodField()
 
     class Meta:
         model = Comment
         fields = [
             'id',
             'replies',
-            'content_type',
+            # 'object_id',
+            # 'content_type',
             'reply_count',
-            'object_id',
             'content',
             'timestamp',
+            'content_object_url',
         ]
+
+        read_only_fields = [
+            # 'content_type',
+            # 'object_id',
+            'reply_count',
+            'replies',
+        ]
+
+    def get_content_object_url(self, obj):
+        try:
+            return obj.content_object.get_api_url()
+        except:
+            return None
 
     def get_replies(self, obj):
         if obj.is_parent:

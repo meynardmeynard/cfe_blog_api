@@ -33,7 +33,8 @@ from .serializers import (
     CommentSerializer,
     CommentDetailSerializer,
     create_comment_serializer,
-    CommentEditSerializer
+    CommentEditSerializer,
+    CommentListSerializer
 )
 
 from comments.models import Comment
@@ -62,17 +63,6 @@ class CommentDetailAPIView(RetrieveAPIView):
     serializer_class = CommentDetailSerializer
     lookup_field = 'pk'
 
-
-# class CommentEditAPIView(UpdateModelMixin, DestroyModelMixin, RetrieveAPIView):
-#     queryset = Comment.objects.filter(id__gte=0)
-#     serializer_class = CommentEditSerializer
-#
-#     def put(self, request, *args, **kwargs):
-#         return self.update(request, *args, **kwargs)
-#
-#     def delete(self, request, *args, **kwargs):
-#         return self.destroy(request, *args, **kwargs)
-
 class CommentEditAPIView(UpdateModelMixin, DestroyModelMixin, RetrieveAPIView):
     queryset = Comment.objects.filter(id__gte=0)
     serializer_class = CommentEditSerializer
@@ -85,14 +75,14 @@ class CommentEditAPIView(UpdateModelMixin, DestroyModelMixin, RetrieveAPIView):
 
 
 class CommentListViewAPIView(ListAPIView):
-    serializer_class = CommentSerializer
+    serializer_class = CommentListSerializer
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['title', 'content', 'user__first_name']
     pagination_class = PostPageNumberPagination  # PageNumberPagination
 
     def get_queryset(self, *args, **kwargs):
         # queryset_list = super(PostListAPIView, self).get_queryset(*args, **kwargs)
-        queryset_list = Comment.objects.all()
+        queryset_list = Comment.objects.filter(id__gte=0)
         query = self.request.GET.get("q")
         if query:
             queryset_list = queryset_list.filter(
@@ -101,15 +91,3 @@ class CommentListViewAPIView(ListAPIView):
                 Q(user__first_name__icontains=query)
             ).distinct()
         return queryset_list
-
-#
-#
-# class PostUpdateAPIView(RetrieveUpdateAPIView):
-#     queryset = Post.objects.all()
-#     serializer_class = PostCreateUpdateSerializer
-#     permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
-#     lookup_field = 'slug'
-#     lookup_url_kwarg = 'abc'
-#
-#     def perform_update(self, serializer):
-#         serializer.save(user=self.request.user)

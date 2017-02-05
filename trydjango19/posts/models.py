@@ -50,6 +50,9 @@ class Post(models.Model):
     def get_absolute_url(self):
         return reverse("posts:post_detail", kwargs={"slug": self.slug})
 
+    def get_api_url(self):
+        return reverse("posts-api:detail", kwargs={"slug": self.slug})
+
     def get_markdown(self):
         content = self.content
         return mark_safe(content)
